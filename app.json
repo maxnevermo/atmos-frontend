@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "MyWeatherApp",
-    "slug": "MyWeatherApp",
+    "name": "Atmos",
+    "slug": "Atmos",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

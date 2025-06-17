@@ -1,14 +1,13 @@
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import Cloudy from "../../assets/icons/cloudy.svg"; // або отримуй іконку через пропс
-
-type City = {
+import { iconMap } from "../../utils/IconMap";
+export type City = {
   id: string;
   country: string;
   time: string;
   name: string;
   temp: number;
-  icon: string
+  icon: string;
 };
 
 type Props = {
@@ -25,6 +24,8 @@ export default function CityListItem({ item, onRemove }: Props) {
       { text: "Yes", onPress: () => onRemove(item.id) },
     ]);
   };
+
+  const Icon = iconMap[item.icon?.toLowerCase() as keyof typeof iconMap];
 
   return (
     <TouchableOpacity
@@ -52,7 +53,7 @@ export default function CityListItem({ item, onRemove }: Props) {
           <Text style={{ fontSize: 15, fontFamily: "Circe-Light", color: "#5F5F5F" }}>
             {item.country}
           </Text>
-          <Text style={{ fontSize: 40, fontFamily: "Circe-Regular" }}>{item.name}</Text>
+          <Text style={{ fontSize: 35, fontFamily: "Circe-Regular" }}>{item.name}</Text>
         </View>
 
         <View>
@@ -66,8 +67,10 @@ export default function CityListItem({ item, onRemove }: Props) {
             {item.time}
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={{ fontSize: 30, fontFamily: "Circe-Regular" }}>{item.temp}°</Text>
-            <Cloudy width={30} height={30} stroke="#9B9B9B" strokeWidth={2} />
+            <Text style={{ fontSize: 30, fontFamily: "Circe-Regular" }}>{item.temp + "\u00B0"}</Text>
+            {Icon && (
+              <Icon width={30} height={30} stroke="#9B9B9B" strokeWidth={2} />
+            )}
           </View>
         </View>
       </View>

@@ -1,4 +1,3 @@
-// fonts.ts
 export const customFonts = {
     "Circe-Thin": require("../assets/fonts/Circe/Circe-Thin.ttf"),
     "Circe-Light": require("../assets/fonts/Circe/Circe-Light.ttf"),

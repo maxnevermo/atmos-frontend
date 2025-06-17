@@ -1,75 +1,74 @@
-import ClearNight from "../assets/icons/clear-night.svg";
-import Cloudy from "../assets/icons/cloudy.svg";
-import Humidity from "../assets/icons/humidity.svg";
-import Rain from "../assets/icons/rain.svg";
-import ScatteredClouds from "../assets/icons/scattered-clouds.svg";
-import Sunny from "../assets/icons/sunny.svg";
-import Windy from "../assets/icons/windy.svg";
+import { useState, useRef, useEffect } from "react";
+import { FlatList, View, Animated } from "react-native";
+import CityListItem, {
+  City,
+} from "../components/custom-components/CityListItem";
+import Header from "@/components/custom-components/Header";
+import CityAddField from "@/components/custom-components/CityAddField";
 
-import CityListItem from "../components/custom-components/CityListItem";
-
-
-import { useState } from "react";
-import { FlatList, Text, View, TouchableOpacity } from "react-native";
-
-const initialCities = [
-  { id: "1", country: "ukraine", time: "11:42pm", name: "morshyn", temp: 13, icon: "cloudy" },
-  { id: "2", country: "ukraine", time: "11:42pm", name: "solonka", temp: 16, icon: "cloudy" },
-  {
-    id: "3",
-    country: "ukraine",
-    time: "11:42pm",
-    name: "zaporizhzhia",
-    temp: 13,
-    icon: "sunny"
-  },
-  { id: "4", country: "ukraine", time: "11:42pm", name: "dnipro", temp: 13, icon: "cloudy" },
-  { id: "5", country: "ukraine", time: "11:42pm", name: "vynnyky", temp: 13, icon: "cloudy" },
-  { id: "6", country: "ukraine", time: "11:42pm", name: "turka", temp: 13, icon: "cloudy" },
-];
+import { getDeviceId } from "../utils/device";
 
 export default function HomeScreen() {
-  const [cities, setCities] = useState(initialCities);
+  const [cities, setCities] = useState<City[]>([]);
+  const [showInput, setShowInput] = useState(false);
+  const [newCityName, setNewCityName] = useState("");
 
-  const handleRemoveCity = (cityId: string) => {
-    setCities((prevCities) => prevCities.filter((city) => city.id !== cityId));
+  useEffect(() => {
+    const fetchCities = async () => {
+      const deviceId = await getDeviceId();
+
+      fetch(`http://192.168.50.156:3000/cities?device_id=${deviceId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const filled = data.map((city: any) => ({
+            ...city,
+          }));
+          setCities(filled);
+        })
+        .catch((err) => console.error("Error loading cities:", err));
+    };
+
+    fetchCities();
+  }, []);
+
+  const inputAnim = useRef(new Animated.Value(0)).current;
+  const rotation = useRef(new Animated.Value(0)).current;
+
+  const handleRemoveCity = async (cityId: string) => {
+    await fetch(`http://localhost:3000/cities/${cityId}`, {
+      method: "DELETE",
+    });
+    setCities((prev) => prev.filter((city) => city.id !== cityId));
   };
 
-  const handleAddCity = () => {
-    // Тут можна реалізувати модальне вікно для додавання міста
-    setCities([
-      ...cities,
-      {
-        id: Date.now().toString(),
-        country: "ukraine",
-        time: "11:42pm",
-        name: "new city",
-        temp: 15,
-        icon: "cloudy"
-      },
-    ]);
+  const resetRotation = () => {
+    Animated.timing(rotation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View
-        style={{
-          paddingHorizontal: 30,
-          paddingTop: 60,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "flex-end"
-        }}
-      >
-        <Text
-          style={{ fontSize: 80, fontFamily: "Circe-Bold" }}
-        >
-          atmos
-        </Text>
-        <TouchableOpacity onPress={handleAddCity}>
-          <Text style={{ fontSize: 70, fontFamily: "Circe-Regular" }}>+</Text>
-        </TouchableOpacity>
-      </View>
+      <Header
+        showInput={showInput}
+        setShowInput={setShowInput}
+        inputAnim={inputAnim}
+        rotation={rotation}
+        resetRotation={resetRotation}
+      />
+
+      {showInput && (
+        <CityAddField
+          newCityName={newCityName}
+          setNewCityName={setNewCityName}
+          setCities={setCities}
+          setShowInput={setShowInput}
+          inputAnim={inputAnim}
+          resetRotation={resetRotation}
+        />
+      )}
 
       <FlatList
         data={cities}
